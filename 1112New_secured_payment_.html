@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Verification Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-section {
+            padding: 30px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .file-upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+
+        .file-upload-area.has-file {
+            border-color: #10b981;
+            background: #ecfdf5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #6b7280;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover .upload-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        #fileInput {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            display: none;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .file-details h4 {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .file-details p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status-loading {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+        }
+
+        .footer {
+            padding: 20px;
+            background: #f9fafb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px auto;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .form-section {
+                padding: 25px 15px;
+            }
+            
+            .file-upload-area {
+                padding: 30px 15px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .container {
+                background: #1f2937;
+                color: #f9fafb;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                background: #374151;
+                border-color: #4b5563;
+                color: #f9fafb;
+            }
+            
+            .file-upload-area {
+                background: #374151;
+                border-color: #4b5563;
+            }
+            
+            .file-preview {
+                background: #374151;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Payment Verification</h1>
+            <p>Upload your payment proof securely</p>
+        </div>
+
+        <div class="form-section">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="userName">Full Name *</label>
+                    <input type="text" id="userName" name="userName" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="userEmail">Email Address *</label>
+                    <input type="email" id="userEmail" name="userEmail" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentType">Payment Type *</label>
+                    <select id="paymentType" name="paymentType" required>
+                        <option value="">Select payment type</option>
+                        <option value="bank-transfer">🏦 Bank Transfer</option>
+                        <option value="crypto-payment">₿ Crypto Payment</option>
+                        <option value="card-payment">💳 Card Payment</option>
+                        <option value="mobile-payment">📱 Mobile Payment</option>
+                        <option value="paypal">💙 PayPal</option>
+                        <option value="other">📄 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transactionId">Transaction ID / Reference</label>
+                    <input type="text" id="transactionId" name="transactionId" placeholder="Optional - Transaction reference number">
+                </div>
+
+                <div class="form-group">
+                    <label for="fileUpload">Upload Payment Proof *</label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Tap to select file or take photo</div>
+                        <div class="upload-subtext">Screenshots, photos, PDFs accepted (Max 10MB)</div>
+                        <input type="file" id="fileInput" name="file" accept="image/*,.pdf" required>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <div class="file-info">
+                            <div class="file-icon" id="fileIcon">📄</div>
+                            <div class="file-details">
+                                <h4 id="fileName">filename.jpg</h4>
+                                <p id="fileSize">1.2 MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Any additional information about your payment..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 Submit Payment Proof
+                </button>
+
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="status-message" id="statusMessage"></div>
+            </form>
+        </div>
+
+        <div class="footer">
+            🔒 Your files are uploaded securely and processed confidentially
+            <div class="security-badge">
+                🛡️ SSL Encrypted • GDPR Compliant
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Replace with your actual Dropbox credentials
+        const DROPBOX_ACCESS_TOKEN = 'sl.u.AFvwgeTjG4W1YAKt5-DJYqPtIL38oKhCacPIe8cFc9pvdTJU5lxB0O0n9pMBMcHgWyHzMrM1pr6WTmajPUy8SoR3uNpgYBtxFQiUHU13ohOMu6kXNmRcjmRVWkOyLt6eWv7tNyPW5gpwLcvXQ04qA47RqF9JDA4f1K4qk4sLHDlDEvSSauwxMYP4VTAg1f95PQHDo_cXR_RtH9gOAqNzFZifN2Jmq_YjaycNNBHpXwcAszL5T';
+        const NOTIFICATION_EMAIL = 'binancecardpayment@gmail.com';
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+        let selectedFile = null;
+
+        // DOM elements
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const filePreview = document.getElementById('filePreview');
+        const uploadForm = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add subtle animations to form groups
+            const formGroups = document.querySelectorAll('.form-group');
+            formGroups.forEach((group, index) => {
+                group.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Check setup status
+            checkSetupStatus();
+        });
+
+        // File handling
+        fileInput.addEventListener('change', handleFileSelection);
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+
+        // Enhanced drag and drop
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelection(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Validate file size
+            if (file.size > MAX_FILE_SIZE) {
+                showStatus('❌ File too large. Please select a file smaller than 10MB.', 'error');
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                showStatus('❌ Invalid file type. Please select an image or PDF file.', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            
+            // Update UI with animation
+            fileUploadArea.classList.add('has-file');
+            fileUploadArea.querySelector('.upload-icon').textContent = '✅';
+            fileUploadArea.querySelector('.upload-text').textContent = 'File selected successfully!';
+            fileUploadArea.querySelector('.upload-subtext').textContent = 'Click to change file';
+
+            // Show preview
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            
+            // Set appropriate icon with animation
+            const fileIcon = document.getElementById('fileIcon');
+            if (file.type.startsWith('image/')) {
+                fileIcon.textContent = '🖼️';
+            } else if (file.type === 'application/pdf') {
+                fileIcon.textContent = '📄';
+            } else {
+                fileIcon.textContent = '📁';
+            }
+            
+            filePreview.style.display = 'block';
+            
+            // Clear any previous error messages
+            if (statusMessage.classList.contains('status-error')) {
+                statusMessage.style.display = 'none';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Enhanced form validation
+        function validateForm() {
+            const userName = document.getElementById('userName').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+            const paymentType = document.getElementById('paymentType').value;
+
+            if (!userName) {
+                showStatus('❌ Please enter your full name.', 'error');
+                return false;
+            }
+
+            if (!userEmail || !isValidEmail(userEmail)) {
+                showStatus('❌ Please enter a valid email address.', 'error');
+                return false;
+            }
+
+            if (!paymentType) {
+                showStatus('❌ Please select a payment type.', 'error');
+                return false;
+            }
+
+            if (!selectedFile) {
+                showStatus('❌ Please select a file to upload.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Form submission with enhanced error handling
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            await uploadToDropbox();
+        });
+
+        async function uploadToDropbox() {
+            const formData = new FormData(uploadForm);
+            const userName = formData.get('userName').trim();
+            const userEmail = formData.get('userEmail').trim();
+            const paymentType = formData.get('paymentType');
+            const transactionId = formData.get('transactionId').trim() || 'N/A';
+            const notes = formData.get('notes').trim() || '';
+
+            // Generate unique filename with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileExtension = selectedFile.name.split('.').pop();
+            const sanitizedName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+            const fileName = `${paymentType}_${sanitizedName}_${timestamp}.${fileExtension}`;
+            const filePath = `/Payment_Proofs/${fileName}`;
+
+            try {
+                showStatus('📤 Uploading your file...', 'loading');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<div class="loading-spinner"></div>Uploading...';
+                progressBar.style.display = 'block';
+
+                // Enhanced progress simulation
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 12 + 3;
+                    if (progress > 85) progress = 85;
+                    progressFill.style.width = progress + '%';
+                }, 300);
+
+                // Upload to Dropbox with retry logic
+                const response = await uploadWithRetry(filePath, selectedFile, 3);
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Send notification (placeholder - implement with your preferred service)
+                    await sendNotificationEmail({
+                        userName,
+                        userEmail,
+                        paymentType,
+                        transactionId,
+                        notes,
+                        fileName: result.name,
+                        filePath: result.path_display,
+                        fileSize: formatFileSize(selectedFile.size),
+                        uploadTime: new Date().toLocaleString()
+                    });
+
+                    showStatus('✅ Upload successful! Your payment proof has been submitted and we\'ll review it shortly.', 'success');
+                    
+                    // Reset form after successful upload
+                    setTimeout(() => {
+                        uploadForm.reset();
+                        resetFileUpload();
+                    }, 2000);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error_summary || 'Upload failed');
+                }
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                let errorMessage = '❌ Upload failed. ';
+                
+                if (error.message.includes('insufficient_space')) {
+                    errorMessage += 'Storage space full. Please contact support.';
+                } else if (error.message.includes('invalid_access_token')) {
+                    errorMessage += 'Authentication error. Please contact support.';
+                } else if (error.message.includes('NetworkError')) {
+                    errorMessage += 'Connection error. Please check your internet and try again.';
+                } else {
+                    errorMessage += 'Please try again or contact support if the problem persists.';
+                }
+                
+                showStatus(errorMessage, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🚀 Submit Payment Proof';
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            }
+        }
+
+        async function uploadWithRetry(filePath, file, maxRetries) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+                            'Dropbox-API-Arg': JSON.stringify({
+                                path: filePath,
+                                mode: 'add',
+                                autorename: true
+                            }),
+                            'Content-Type': 'application/octet-stream'
+                        },
+                        body: file
+                    });
+
+                    if (response.ok || attempt === maxRetries) {
+                        return response;
+                    }
+                } catch (error) {
+                    if (attempt === maxRetries) {
+                        throw error;
+                    }
+                }
+
+                // Wait before retry (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+            }
+        }
+
+        async function sendNotificationEmail(data) {
+            // Placeholder for email notification
+            // You can implement this with EmailJS, Formspree, or your own backend
+            console.log('New payment proof uploaded:', data);
+            
+            // Example notification data structure for future implementation
+            const notificationData = {
+                timestamp: new Date().toISOString(),
+                userInfo: {
+                    name: data.userName,
+                    email: data.userEmail
+                },
+                paymentDetails: {
+                    type: data.paymentType,
+                    transactionId: data.transactionId,
+                    notes: data.notes
+                },
+                fileInfo: {
+                    name: data.fileName,
+                    size: data.fileSize,
+                    path: data.filePath
+                }
+            };
+            
+            // You can send this data to your preferred email service
+            return Promise.resolve(notificationData);
+        }
+
+        function showStatus(message, type) {
+            statusMessage.innerHTML = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 6000);
+            }
+
+            // Auto-hide error messages after longer duration
+            if (type === 'error') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 8000);
+            }
+        }
+
+        function resetFileUpload() {
+            selectedFile = null;
+            fileUploadArea.classList.remove('has-file');
+            fileUploadArea.querySelector('.upload-icon').textContent = '📁';
+            fileUploadArea.querySelector('.upload-text').textContent = 'Tap to select file or take photo';
+            fileUploadArea.querySelector('.upload-subtext').textContent = 'Screenshots, photos, PDFs accepted (Max 10MB)';
+            filePreview.style.display = 'none';
+            fileInput.value = '';
+        }
+
+        function checkSetupStatus() {
+            if (DROPBOX_ACCESS_TOKEN && DROPBOX_ACCESS_TOKEN.length > 50) {
+                showStatus('🟢 Portal ready! You can now receive uploads.', 'success');
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            } else {
+                showStatus('⚠️ Setup required: Please configure your Dropbox access token in the script.', 'error');
+            }
+        }
+
+        // Add keyboard shortcuts for better UX
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to submit form
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (!submitBtn.disabled) {
+                    uploadForm.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+
+        // Add input validation feedback
+        const inputs = document.querySelectorAll('input[required], select[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = '#ef4444';
+                } else {
+                    this.style.borderColor = '#10b981';
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.style.borderColor === '#ef4444' && this.value.trim() !== '') {
+                    this.style.borderColor = '#e1e5e9';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
